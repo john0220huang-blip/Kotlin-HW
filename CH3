@@ -1,0 +1,74 @@
+package com.example.test20251017;
+import android.os.Bundle; // 匯入 Bundle，用於接收/保存活動狀態
+import android.widget.Button; // 匯入 Button 元件類別
+import android.widget.EditText; // 匯入 EditText 元件類別
+import android.widget.RadioButton; // 匯入 RadioButton 元件類別
+import android.widget.RadioGroup; // 匯入 RadioGroup 元件類別
+import android.widget.TextView; // 匯入 TextView 元件類別
+
+import androidx.appcompat.app.AppCompatActivity; // 匯入 AppCompatActivity 基底類別
+
+import java.util.Random; // 匯入 Random，用於產生隨機數
+public class MainActivity extends AppCompatActivity { // 宣告 MainActivity 類別並繼承 AppCompatActivity
+    private EditText edName; // 宣告玩家姓名輸入框變數
+    private RadioGroup rg; // 宣告單選群組變數（裝剪刀石頭布）
+    private RadioButton rbScissor, rbStone, rbPaper; // 宣告三個單選按鈕變數
+    private Button btnMora; // 宣告「猜拳」按鈕變數
+    private TextView tvName, tvWinner, tvMmora, tvCmora; // 宣告四個結果顯示文字變數
+    private final Random random = new Random(); // 建立 Random 物件，用於電腦隨機出拳
+
+    @Override // 覆寫生命週期方法 onCreate
+    protected void onCreate(Bundle savedInstanceState) { // 活動建立時呼叫
+        super.onCreate(savedInstanceState); // 呼叫父類別的 onCreate
+        setContentView(R.layout.activity_main); // 指定版面配置檔 activity_main.xml
+
+        edName    = findViewById(R.id.ed_name); // 連結 XML 中的 EditText（玩家姓名）
+        rg        = findViewById(R.id.radioGroup); // 連結 XML 中的 RadioGroup
+        rbScissor = findViewById(R.id.btn_scissor); // 連結「剪刀」單選按鈕
+        rbStone   = findViewById(R.id.btn_stone); // 連結「石頭」單選按鈕
+        rbPaper   = findViewById(R.id.btn_paper); // 連結「布」單選按鈕
+        btnMora   = findViewById(R.id.btn_mora); // 連結「猜拳」按鈕
+        tvName    = findViewById(R.id.tv_name); // 連結顯示「名字」的 TextView
+        tvWinner  = findViewById(R.id.tv_winner); // 連結顯示「勝利者」的 TextView
+        tvMmora   = findViewById(R.id.tv_mmora); // 連結顯示「我方出拳」的 TextView
+        tvCmora   = findViewById(R.id.tv_cmora); // 連結顯示「電腦出拳」的 TextView
+
+        btnMora.setOnClickListener(v -> { // 替「猜拳」按鈕設定點擊事件監聽器
+            String name = edName.getText().toString().trim(); // 取得玩家輸入的姓名並去除前後空白
+            if (name.isEmpty()) name = "玩家"; // 若未輸入姓名則給預設「玩家」
+            tvName.setText(String.format("名字:\n%s",edName.getText().toString())); // 將姓名顯示到「名字」欄位
+
+            int my = getMyChoice(); // 取得我方出拳（0:剪刀 1:石頭 2:布）
+            tvMmora.setText("我方出拳：" + toText(my)); // 將我方出拳轉成文字並顯示
+
+            int com = random.nextInt(3); // 產生 0~2 的隨機整數作為電腦出拳
+            tvCmora.setText("電腦出拳：" + toText(com)); // 顯示電腦出拳文字
+
+            String result = judge(my, com); // 判定勝負並取得結果字串
+            tvWinner.setText(String.format("勝利者:\n%s",result)); // 將勝負結果顯示在「勝利者」欄位
+        }); // 點擊事件設定結束
+    } // onCreate 結束
+
+    private int getMyChoice() { // 自訂方法：讀取使用者在 RadioGroup 的選擇
+        int checkedId = rg.getCheckedRadioButtonId(); // 取得被選取的 RadioButton ID
+        if (checkedId == R.id.btn_scissor) return 0; // 選到「剪刀」回傳 0
+        if (checkedId == R.id.btn_stone)   return 1; // 選到「石頭」回傳 1
+        return 2; // 其餘情況視為選到「布」回傳 2
+    } // getMyChoice 結束
+
+    private String toText(int v) { // 自訂方法：將代碼轉為中文文字
+        switch (v) { // 判斷代碼
+            case 0: return "剪刀"; // 0 代表「剪刀」
+            case 1: return "石頭"; // 1 代表「石頭」
+            default: return "布"; // 其他（2）代表「布」
+        } // switch 結束
+    } // toText 結束
+
+    private String judge(int my, int com) { // 自訂方法：依照我方與電腦出拳判定勝負
+        if (my == com) return "平手"; // 相同出拳則為平手
+        boolean iWin = (my == 0 && com == 2) || // 剪刀贏布
+                (my == 1 && com == 0) || // 石頭贏剪刀
+                (my == 2 && com == 1);   // 布贏石頭
+        return iWin ? "我方" : "電腦"; // 根據布林值回傳結果字串
+    } // judge 結束
+} // 類別結束
